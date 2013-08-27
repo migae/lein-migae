@@ -1,0 +1,81 @@
+(ns leiningen.migae.repl
+  "repl - run dev server in a repl session"
+  (:require [leinjacker.deps :as deps]
+            [leiningen.core.classpath :as classpath]
+            [clojure.java.io :as io])
+  (:use [leinjacker.eval :only (eval-in-project)]
+        [leiningen.migae.util :only (ensure-handler-set! update-project)]))
+
+(def opts
+  [["-p" "--port" "The port number to bind to on the local machine."
+   :parse-fn #(Integer. %) :default 8080]
+  ["-a" "--address" "The address of the interface on the local machine to bind to (or 0.0.0.0 for all interfaces)." :default "127.0.0.1"]
+  ["-s" "--server" "The server to use to determine the latest SDK version"]
+  ["--disable_update_check" "Disable the check for newer SDK versions."]
+  ["--sdk_root" "Overrides where the SDK is located."]
+  ["--generated_dir=DIR" "Set the directory where generated files are created."]
+  ["-h" "--help" "Show this help message and exit."]
+  ["-v" "--[no-]verbose" :default false]]
+;  ["-l" "--log-directory" :default "/some/path"]]
+)
+
+(defn classpath-dirs 
+  "list of all dirs on the leiningen classpath"
+  [project]
+  (filter
+   #(.isDirectory (io/file %))
+   (classpath/get-classpath project)))
+
+(defn load-namespaces
+  "Create require forms for each of the supplied symbols. This exists because
+  Clojure cannot load and use a new namespace in the same eval form."
+  [& syms]
+  `(require
+    ~@(for [s syms :when s]
+        `'~(if-let [ns (namespace s)]
+             (symbol ns)
+             s))))
+
+(defn reload-paths [project]
+  (or (get-in project [:ring :reload-paths])
+      (classpath-dirs project)))
+
+(defn add-server-dep [project]
+  (println "adding dep")
+  (update-project project deps/add-if-missing '[ring-server "0.2.8"]))
+
+(defn server-task
+  "Shared logic for server and server-headless tasks."
+  [project options]
+  (ensure-handler-set! project)
+  (let [project (-> project
+                    (assoc-in [:ring :reload-paths] (reload-paths project))
+                    (update-in [:ring] merge options))]
+    (eval-in-project
+     (add-server-dep project)
+     (do (println "starting server")
+     `(ring.server.leiningen/serve
+       '~(select-keys project [:ring])))
+     (load-namespaces
+      'ring.server.leiningen
+      (-> project :ring :handler)
+      (-> project :ring :init)
+      (-> project :ring :destroy)))))
+
+(defn repl
+  "Start a Ring server and open a browser."
+  ([project]
+     (server-task project {}))
+  ([project port]
+     (server-task project {:port (Integer. port)})))
+
+;; (defn replxx
+;;   "repl"
+;;   [project & args]
+;;   (do
+;;     (println "****************************************************************")
+;;     (eval-in-project
+;;      project
+;;      (let [handler  (-> project :ring :handler)
+;;            x (println "handler " handler)]
+;;        (serve handler)))))

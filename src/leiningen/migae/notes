@@ -1,0 +1,92 @@
+(ns leiningen.migae.repl
+  "mrepl - run dev server in a repl session"
+  (:import javax.servlet.http.HttpServlet
+           javax.servlet.Filter
+           ;; [org.mortbay.jetty.handler ContextHandlerCollection]
+           ;; [org.mortbay.jetty Server Handler]
+           ;; [org.mortbay.jetty.servlet Context ServletHolder FilterHolder]
+           ;com.google.appengine.tools.development.DevAppServerMain
+           ;; from DevAppServerMain:
+
+           [com.google.appengine.tools.info SdkInfo UpdateCheck]
+           [com.google.appengine.tools.plugins SDKPluginManager SDKRuntimePlugin]
+
+;;           com.google.appengine.tools.plugins.SDKRuntimePlugin.ApplicationDirectories
+           [com.google.appengine.tools.util
+            Action Logging Option Parser]
+           ;; com.google.appengine.tools.util.Parser.ParseResult
+           com.google.apphosting.utils.config.GenerationDirectory
+           ;; com.google.common.annotations.VisibleForTesting
+;;           com.google.common.collect.ImmutableList
+
+           ;; java.awt.Toolkit
+           [java.io File PrintStream]
+           [java.util Arrays HashMap List Map TimeZone]
+           )
+  (:use [clojure.tools.cli :only [cli]])
+  (:require [clojure.java.io :as io]
+            [leiningen.classpath :as cp]
+            [leiningen.core [eval :as eval] [main :as main]]
+            [clojure.string :as string]))
+
+(def opts
+  [["-p" "--port" "The port number to bind to on the local machine."
+   :parse-fn #(Integer. %) :default 8080]
+  ["-a" "--address" "The address of the interface on the local machine to bind to (or 0.0.0.0 for all interfaces)." :default "127.0.0.1"]
+  ["-s" "--server" "The server to use to determine the latest SDK version"]
+  ["--disable_update_check" "Disable the check for newer SDK versions."]
+  ["--sdk_root" "Overrides where the SDK is located."]
+  ["--generated_dir=DIR" "Set the directory where generated files are created."]
+  ["-h" "--help" "Show this help message and exit."]
+  ["-v" "--[no-]verbose" :default false]]
+;  ["-l" "--log-directory" :default "/some/path"]]
+)
+
+
+(defn repl
+  "repl"
+  [project & args]
+  (let [pargs (cli args 
+                ["-p" "--port" "The port number to bind to on the local machine."
+                 :parse-fn #(Integer. %) :default 8080]
+                ["-a" "--address" "The address of the interface on the local machine to bind to (or 0.0.0.0 for all interfaces)." :default "127.0.0.1"]
+                ["-s" "--server" "The server to use to determine the latest SDK version"]
+                ["--disable_update_check" "Disable the check for newer SDK versions."]
+                ["--sdk_root DIR" "Overrides where the SDK is located."]
+                ["--generated_dir DIR" "Set the directory where generated files are created."]
+                ["-h" "--help" "Show this help message and exit."]
+                ["-v" "--[no-]verbose" :default false]
+                )
+  ;; ;; DevAppServerMain.java
+  ;; public static void main(String args[]) throws Exception {
+  ;;   recordTimeZone();
+  ;;   Logging.initializeLogging();
+  ;;   if (System.getProperty("os.name").equalsIgnoreCase("Mac OS X")) {
+  ;;     Toolkit.getDefaultToolkit();
+  ;;   }
+  ;;   new DevAppServerMain(args);
+  ;; }
+
+  ;; public DevAppServerMain(String[] args) throws Exception {
+  ;;   Parser parser = new Parser();
+  ;;   ParseResult result = parser.parseArgs(ACTION, PARSERS, args);
+  ;;   result.applyArgs();
+  ;; }
+
+  ;;  here ACTION is StartAction, which has an apply() method that
+  ;;  runs the server
+
+  ;; 1. validate appDir (= wardir passed as 1st arg)
+  ;;    check:  wardir exists and is directory
+
+  ;; 2. setup plugins
+        ;; SDKRuntimePlugin runtimePlugin = SDKPluginManager.findRuntimePlugin(appDir);
+        ;; if (runtimePlugin != null) {
+        ;;   ApplicationDirectories appDirs = runtimePlugin.generateApplicationDirectories(appDir);
+        ;;   appDir = appDirs.getWarDir();
+        ;;   externalResourceDir = appDirs.getExternalResourceDir();
+        ;; }
+
+    ;;     plugins (-> (SDKPluginManager.) (.findRuntimePlugin "war/"))]
+    ;; (println plugins)))
+]))
