@@ -1,6 +1,6 @@
-(defproject lein-migae "0.1.0-SNAPSHOT"
+(defproject lein-migae "0.1.1-SNAPSHOT"
   :description "Leiningen plugin for migae sdk"
-  :url "http://github.com/greynolds/migae"
+  :url "http://github.com/greynolds/lein-migae"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.5.1"]
