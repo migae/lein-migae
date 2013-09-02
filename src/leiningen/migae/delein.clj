@@ -9,35 +9,33 @@
             [clojure.string :as string]))
 
 (defn flat-copy-tree [from to]
-  ;; (println "\nFiles in " from " to " to)
+;;  (println "\nFiles in " from " to " to)
   (doseq [f (.listFiles (io/as-file from))]
     (let [fn  (.getName (io/as-file f))]
-      (do ;(print "\ttgt: " f "\n")
-        (if (.isDirectory f)
-          (flat-copy-tree (.getPath f) to)
-          (do
-            ;; (print (format "\tfrom %s to %s/%s\n" f to fn))
-                                        ;(print "copying\n")
-            (io/make-parents to fn)
-            (io/copy f (io/file to fn))))))))
+      (if (.isDirectory f)
+        (flat-copy-tree (.getPath f) to)
+        (do
+          (print (format "deleining %s\n" f))
+          (io/make-parents to fn)
+          (io/copy f (io/file to fn)))))))
 
 (defn delein [project & args]
 ;;  (println "migae deleining...")
-  (println "home: " (System/getProperty "user.home"))
+  ;; (println "home: " (System/getProperty "user.home"))
   (let [lib (str (:war (:gae-app project)) "/WEB-INF/lib/")
         home (System/getProperty "user.home")]
-    (flat-copy-tree (str (:gae-sdk project) "/lib/user") lib)
+    (flat-copy-tree (str (:gae-sdk project) "/lib/user") lib)))
     ;; TODO: iterate over (:dependencies project) and copy jars to lib
-    (doseq [dep (:dependencies project)]
-      (let [[name nbr] dep]
-        (do ; (println (format "name: %s - nbr: %s" name nbr))
-            ; (println (format "local repo: %s" (:local-repo project)))
-            (let [[a class] (.split (str name) "/")
-                  group (.replace a "." "/")
-                  fpath (str home "/.m2/repository/" group "/" class "/" nbr)
-                  fnm (str class "-" nbr ".jar")
-                  from (.getCanonicalPath (io/as-file (str fpath "/" fnm)))]
-;;              (println (format "\tgroup: %s - class: %s\n\t%s" group class fnm))
-              (do
-                (println (format "deleining %s" from))
-                (io/copy (io/file from) (io/file lib fnm)))))))))
+;;     (doseq [dep (:dependencies project)]
+;;       (let [[name nbr] dep]
+;;         (do ; (println (format "name: %s - nbr: %s" name nbr))
+;;             ; (println (format "local repo: %s" (:local-repo project)))
+;;             (let [[a class] (.split (str name) "/")
+;;                   group (.replace a "." "/")
+;;                   fpath (str home "/.m2/repository/" group "/" class "/" nbr)
+;;                   fnm (str class "-" nbr ".jar")
+;;                   from (.getCanonicalPath (io/as-file (str fpath "/" fnm)))]
+;; ;;              (println (format "\tgroup: %s - class: %s\n\t%s" group class fnm))
+;;               (do
+;;                 (println (format "deleining %s" from))
+;;                 (io/copy (io/file from) (io/file lib fnm)))))))))

@@ -63,6 +63,24 @@
         ;;         (io/reader (str cpath))))
         (main/abort (format "Template resource '%s' not found in %s." path (cio/pwd)))))))
 
+(defn flat-copy-tree [from to]
+;;  (println "\nFiles in " from " to " to)
+  (doseq [f (.listFiles (io/as-file from))]
+    (let [fn  (.getName (io/as-file f))]
+      (if (.isDirectory f)
+        (flat-copy-tree (.getPath f) to)
+        (do
+          (print (format "deleining %s\n" f))
+          (io/make-parents to fn)
+          (io/copy f (io/file to fn)))))))
+
+(defn delein [project & args]
+;;  (println "migae deleining...")
+  ;; (println "home: " (System/getProperty "user.home"))
+  (let [lib (str (:war (:gae-app project)) "/WEB-INF/lib/")
+        home (System/getProperty "user.home")]
+    (flat-copy-tree (str (:gae-sdk project) "/lib/user") lib)))
+
 ;;;;;;;;;;;;;;;;
 ;; The original code (in leiningen/src/leiningen/new/templates.clj)
 ;; creates the project dir.  That's no good for us - we're already in
@@ -111,6 +129,7 @@ run 'lein migae config'."
     ;; (println (str "classpath: " (classpath)))
     ;; (println (str "compiling " (:name project)))
     ;; (jar/jar project)
+    (delein project args)
     (let [render (renderer "etc") ;; (:name project))
           config (:gae-app project)
           static_exclude (:pattern (:exclude (:statics   config)))
