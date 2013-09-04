@@ -64,23 +64,26 @@
         (main/abort (format "Template resource '%s' not found in %s." path (cio/pwd)))))))
 
 (defn flat-copy-tree [from to]
-;;  (println "\nFiles in " from " to " to)
+  (println (format "flat-copy-tree from %s to %s" from to))
   (doseq [f (.listFiles (io/as-file from))]
     (let [fn  (.getName (io/as-file f))]
+;          foo (println (format "current file: %s" fn))]
       (if (.isDirectory f)
-        (flat-copy-tree (.getPath f) to)
+        (do (println (format "\tsubdir: %s" fn))
+            (flat-copy-tree f to))
         (do
-          (print (format "deleining %s\n" f))
+          (print (format "\t%s\n" fn))
           (io/make-parents to fn)
           (io/copy f (io/file to fn)))))))
 
 (defn delein [project & args]
-;;  (println "migae deleining...")
+  ;; (println "migae deleining...")
   ;; (println "home: " (System/getProperty "user.home"))
   (let [sdklib (str (:sdk (:migae project)) "/lib/user")
-        warlib (str (:war (:migae project)) "/WEB-INF/lib/")]
-;;        home (System/getProperty "user.home")]
-    (flat-copy-tree sdklib warlib)))
+        warlib (str (:war (:migae project)) "/WEB-INF/lib/")
+        home (System/getProperty "user.home")]
+    (do (println (format "deleining from %s to %s" sdklib warlib))
+    (flat-copy-tree sdklib warlib))))
 
 ;;;;;;;;;;;;;;;;
 ;; The original code (in leiningen/src/leiningen/new/templates.clj)
