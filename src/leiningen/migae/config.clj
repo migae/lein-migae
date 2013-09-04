@@ -6,7 +6,6 @@
             [clojure.contrib.io :as cio]
             [stencil.core :as stencil]
             [leiningen.classpath :as cp]
-;            [leiningen.new.templates :as tmpl]
             [leiningen.core [eval :as eval] [main :as main]]
             [clojure.string :as string]))
 

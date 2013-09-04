@@ -13,13 +13,12 @@ standard :target-path to decide where to put the jar.  This plugin also supports
            ;; com.google.appengine.tools.admin.AppCfg
            ;; [org.apache.commons.exec CommandLine DefaultExecutor]
            )
-  (:require [leiningen.migae.clean :as clean]
-            [leiningen.migae.config :as config]
+  (:require [leiningen.migae.config :as config]
             [leiningen.migae.deploy :as deploy]
             [leiningen.migae.delein :as delein]
-            [leiningen.migae.gserver :as gserver]
-            [leiningen.migae.jetty :as jetty]
-            [leiningen.migae.repl :as repl]
+            ;; [leiningen.migae.gserver :as gserver]
+            ;; [leiningen.migae.jetty :as jetty]
+            ;; [leiningen.migae.repl :as repl]
             [leiningen.migae.util :as util]
             [clojure.tools.cli :as cli]
             [clojure.tools.logging :as log :only [debug info]]))
@@ -59,11 +58,10 @@ standard :target-path to decide where to put the jar.  This plugin also supports
            not-found))))
   ([task] (resolve-task task #'task-not-found)))
 
-(defn #^{:subtasks [#'clean/clean
-                    #'config/config
-                    #'gserver/gserver
-                    #'jetty/jetty
-                    #'repl/repl
+(defn #^{:subtasks [#'config/config
+                    ;; #'gserver/gserver
+                    ;; #'jetty/jetty
+                    ;; #'repl/repl
                     #'delein/delein
                     #'deploy/deploy]}
   migae

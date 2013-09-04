@@ -9,6 +9,7 @@
                  [org.clojure/tools.logging "0.2.3"]
                  [org.mortbay.jetty/jetty "6.1.26"]
                  [org.clojure/tools.cli "0.2.2"]
+                 [stencil "0.3.2"]
                  [leinjacker "0.4.1"]
                  [ring "1.1.8"]
                  [ring-refresh "0.1.2"]
