@@ -77,9 +77,10 @@
 (defn delein [project & args]
 ;;  (println "migae deleining...")
   ;; (println "home: " (System/getProperty "user.home"))
-  (let [lib (str (:war (:gae-app project)) "/WEB-INF/lib/")
-        home (System/getProperty "user.home")]
-    (flat-copy-tree (str (:gae-sdk project) "/lib/user") lib)))
+  (let [sdklib (str (:sdk (:migae project)) "/lib/user")
+        warlib (str (:war (:migae project)) "/WEB-INF/lib/")]
+;;        home (System/getProperty "user.home")]
+    (flat-copy-tree sdklib warlib)))
 
 ;;;;;;;;;;;;;;;;
 ;; The original code (in leiningen/src/leiningen/new/templates.clj)
@@ -92,15 +93,17 @@
 (defn ->files
   [{:keys [name] :as data} & paths]
   (do
+;    (println (format "->files %s") name)
     ;; (let [dir (or *dir*
     ;;               (.getPath (io/file
     ;;                          (System/getProperty "leiningen.original.pwd" name))))]
-    ;;   (println (format "->files: installing %s" dir))
-;      (if (or *dir* (.mkdir (io/file dir)))
+;      (println (format "->files: installing %s" dir))
+;;      (if (or *dir* (.mkdir (io/file dir)))
         (let [dir "./"]
           (doseq [path paths]
             (do
-              (println (format "->files: installing to %s" (first path)))
+              (println (format "->files: installing to %s"
+                               (render-text (first path) data)))
               (if (string? path)
                 (.mkdirs (template-path dir path data))
                 (let [[path content] path
@@ -130,48 +133,7 @@ run 'lein migae config'."
     ;; (println (str "compiling " (:name project)))
     ;; (jar/jar project)
     (delein project args)
-    (let [render (renderer "etc") ;; (:name project))
-          config (:gae-app project)
-          static_exclude (:pattern (:exclude (:statics   config)))
-          resource_exclude (:pattern (:exclude (:resources   config)))
-          ;; foo (println static_exclude)
-          ;; NOTE:  data maps of migae-template and migae plugin must match
-          data {:name	(:name project) ;; :name required by ->files
-                :project	(:name project)
-                :projname	(:name project)
-                :app-id		(:id config)
-                :display-name	(:display-name config)
-                :version	(:dev   (:version config))
-                :war		(:war	    config)
-
-                :servlets	[(:servlets config)]
-
-                ;; TODO: conditional processing of include/expire/exclude
-                :static_src    (:src (:statics config))
-                :static_dest   (:dest (:statics config))
-                :static_include_pattern	(:pattern
-                                         (:include (:statics config)))
-                :static_expire	(:expire (:include (:statics config)))
-                :static_exclude (if (nil? static_exclude)
-                                  false
-                                  {:static_exclude_pattern
-                                   (:pattern (:exclude (:statics   config)))})
-
-                :resource_src  (:src (:resources config))
-                :resource_dest (:dest (:resources config))
-                :resource_include_pattern (:pattern
-                                           (:include (:resources config)))
-                :resource_expire (:expire (:include (:resources config)))
-                :resource_exclude (if (nil? resource_exclude)
-                                    false
-                                    {:resource_exclude_pattern
-                                     (:pattern (:exclude (:resources config)))})
-
-                :welcome	(:welcome   config)
-                :threads	(:threads   config)
-                :sessions	(:sessions  config)
-                :java-logging	(:java-logging config)}]
-
+    (let [render (renderer "etc")]
       (println (format "copying static files from src tree to war tree"))
       ;; TODO:  use {{statics}} instead of hardcoded paths, e.g.
                  ;; ["{{war}}/{{static_dest}}/css/{{project}}.css"
@@ -180,27 +142,27 @@ run 'lein migae config'."
                  ;;  (render (render-text "{{static_src}}/js/{{project}}.js" data))]
 
       (copy-tree "src/main/public" "war")
-      ;; (copy-tree "src/main/public/css" "war/css")
-      ;; (copy-tree "src/main/public/js" "war/js")
 
                  ;; TODO: handle binary files??
                  ;; ["{{war}}/favicon.ico"
                  ;;  (render (render-text "{{resource_src}}/favicon.ico" data))]
       ;;      (println (format "copying resource files from src tree to war tree"))
 
-      (println (format "installing templates"))
+      (println (format "installing config files from templates"))
       (do
-        (->files data
+        (->files project ;; data
                  ;; [to file  		from template]
 
-                 ["{{war}}/WEB-INF/appengine-web.xml"
-                  (render "appengine-web.xml.mustache" data)]
+                 ["{{#migae}}{{war}}{{/migae}}/WEB-INF/appengine-web.xml"
+                  (render "appengine-web.xml.mustache" project)]
 
-                 ["{{war}}/WEB-INF/web.xml"
-                  (render "web.xml.mustache" config)]
+                 ["{{#migae}}{{war}}{{/migae}}/WEB-INF/web.xml"
+                  (render "web.xml.mustache" project)]
 
-                 ["{{war}}/WEB-INF/{{java-logging}}"
-                  (render (render-text "{{java-logging}}" data))]
+                 ["{{#migae}}{{war}}{{/migae}}/WEB-INF/{{#migae}}{{java-logging}}{{/migae}}"
+                  (render
+                   (render-text "{{#migae}}{{java-logging}}{{/migae}}" project)
+                   project)]
 
                  )
         (println "ok"))
