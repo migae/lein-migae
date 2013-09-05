@@ -15,15 +15,6 @@ It is designed to work with the results of migae template (.i.e. "lein new migae
 
   Collaborators welcomed.
 
-## Installation
-
-Download from https://github.com/greynolds/lein-migae, cd to the dir, and
-run "lein install" (remember this is alpha stuff; if it ever makes it
-to prod status it'll live on the web somewhere).  The migae plugin is
-only useful for projects created by the migae-template, which have:
-
-  :plugins [[migae "0.2.0-SNAPSHOT"]
-
 ## Usage
 
 This plugin tries to run the whole show from project.clj.
@@ -106,9 +97,19 @@ Step 4.  Deploy to the cloud:
 
 Don't forget to set the version number in project.clj first!
 
-## Options
+## Development
 
-## Examples
+Download from https://github.com/greynolds/lein-migae, cd to the dir, and
+run "lein install" (remember this is alpha stuff; if it ever makes it
+to prod status it'll live on the web somewhere).  The migae plugin is
+only useful for projects created by the migae-template, which have:
+
+  :plugins [[migae "0.2.0-SNAPSHOT"]
+
+
+## TODO
+
+Make reload filter only reload changed code.
 
 ...
 
