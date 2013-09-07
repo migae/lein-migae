@@ -16,6 +16,7 @@ standard :target-path to decide where to put the jar.  This plugin also supports
   (:require [leiningen.migae.config :as config]
             [leiningen.migae.deploy :as deploy]
             [leiningen.migae.libdir :as libdir]
+            [leiningen.migae.run :as run]
             ;; [leiningen.migae.gserver :as gserver]
             ;; [leiningen.migae.jetty :as jetty]
             ;; [leiningen.migae.repl :as repl]
@@ -59,6 +60,7 @@ standard :target-path to decide where to put the jar.  This plugin also supports
   ([task] (resolve-task task #'task-not-found)))
 
 (defn #^{:subtasks [#'config/config
+                    #'run/run
                     ;; #'gserver/gserver
                     ;; #'jetty/jetty
                     ;; #'repl/repl
