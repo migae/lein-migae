@@ -62,19 +62,6 @@
         ;;         (io/reader (str cpath))))
         (main/abort (format "Template resource '%s' not found in %s." path (cio/pwd)))))))
 
-(defn flat-copy-tree [from to]
-  (println (format "flat-copy-tree from %s to %s" from to))
-  (doseq [f (.listFiles (io/as-file from))]
-    (let [fn  (.getName (io/as-file f))]
-;          foo (println (format "current file: %s" fn))]
-      (if (.isDirectory f)
-        (do (println (format "\tsubdir: %s" fn))
-            (flat-copy-tree f to))
-        (do
-          (print (format "\t%s\n" fn))
-          (io/make-parents to fn)
-          (io/copy f (io/file to fn)))))))
-
 ;;;;;;;;;;;;;;;;
 ;; The original code (in leiningen/src/leiningen/new/templates.clj)
 ;; creates the project dir.  That's no good for us - we're already in
