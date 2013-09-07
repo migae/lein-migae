@@ -129,13 +129,15 @@ in <project>/.project using the data fields from project.clj.  So you
 should not edit the files directly; if you need to make a
 change (e.g. change the version number), edit the project.clj and then
 run 'lein migae config'."
-  [project & args]
+  [projmap & args]
   (do
     ;; (println (str "classpath: " (classpath)))
     ;; (println (str "compiling " (:name project)))
     ;; (jar/jar project)
-    (delein project args)
-    (let [render (renderer "etc")]
+    (delein projmap args)
+    (let [render (renderer "etc")
+          project (assoc projmap
+                 :projdir (System/getProperty "leiningen.original.pwd"))]
       (println (format "copying static files from src tree to war tree"))
       ;; TODO:  use {{statics}} instead of hardcoded paths, e.g.
                  ;; ["{{war}}/{{static_dest}}/css/{{project}}.css"
@@ -154,6 +156,9 @@ run 'lein migae config'."
       (do
         (->files project ;; data
                  ;; [to file  		from template]
+
+                 ["src/.dir-locals.el"
+                  (render "dir-locals.el.mustache" project)]
 
                  ["{{#migae}}{{war}}{{/migae}}/WEB-INF/appengine-web.xml"
                   (render "appengine-web.xml.mustache" project)]
