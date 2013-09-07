@@ -3,7 +3,7 @@
 ;;  (:import [java.io File])
   (:use [leiningen.new.templates :only [render-text slurp-resource sanitize year]])
   (:require [clojure.java.io :as io]
-            [clojure.contrib.io :as cio]
+;            [clojure.contrib.io :as cio]
             [stencil.core :as stencil]
             [leiningen.classpath :as cp]
             [leiningen.core [eval :as eval] [main :as main]]
@@ -52,16 +52,23 @@
       ;; (if-let [resource (io/resource path)]
       (if-let [resource (io/as-relative-path path)]
         (if data
-          (do (println (format "slurping %s" (str (cio/pwd) "/" resource)))
-              (render-text (slurp resource) data))
-          (do (println (format "io/reading %s" (str (cio/pwd) "/" resource)))
-              (io/reader resource)))
+          (do
+            ;; (println (format "slurping %s"
+            ;;                  (str (System/getProperty "leiningen.original.pwd")
+            ;;                       "/" resource)))
+            (render-text (slurp resource) data))
+          (do
+            ;; (println (format "io/reading %s"
+            ;;                  (str (System/getProperty "leiningen.original.pwd")
+            ;;                       "/" resource)))
+            (io/reader resource)))
         ;; (if (.isFile f)
         ;;   (if data
         ;;         (render-text (slurp-resource cpath) data))
         ;;         (io/reader (str cpath))))
-        (main/abort (format "Template resource '%s' not found in %s." path (cio/pwd)))))))
-
+        (main/abort (format "Template resource '%s' not found in %s."
+                            path
+                            (System/getProperty "leiningen.original.pwd")))))))
 ;;;;;;;;;;;;;;;;
 ;; The original code (in leiningen/src/leiningen/new/templates.clj)
 ;; creates the project dir.  That's no good for us - we're already in
@@ -82,15 +89,14 @@
         (let [dir "./"]
           (doseq [path paths]
             (do
-              (println (format "->files: installing to %s"
-                               (render-text (first path) data)))
+              ;; (println (format "installing to %s"
+              ;;                  (render-text (first path) data)))
               (if (string? path)
                 (.mkdirs (template-path dir path data))
                 (let [[path content] path
                       path (template-path dir path data)]
                   (.mkdirs (.getParentFile path))
                   (io/copy content (io/file path)))))))))
-
 ;;                                         ;    (println "Could not create directory " dir ". Maybe it already exists?"))))
 ;; ;; end of overrides
 
@@ -115,7 +121,7 @@ run 'lein migae config'."
     (let [render (renderer "etc")
           project (assoc projmap
                  :projdir (System/getProperty "leiningen.original.pwd"))]
-      (println (format "copying static files from src tree to war tree"))
+      ;; (println (format "copying static files from src tree to war tree"))
       ;; TODO:  use {{statics}} instead of hardcoded paths, e.g.
                  ;; ["{{war}}/{{static_dest}}/css/{{project}}.css"
                  ;;  (render (render-text "{{static_src}}/css/{{project}}.css" data))]
@@ -129,7 +135,7 @@ run 'lein migae config'."
                  ;;  (render (render-text "{{resource_src}}/favicon.ico" data))]
       ;;      (println (format "copying resource files from src tree to war tree"))
 
-      (println (format "installing config files from templates"))
+      ;; (println (format "installing config files from templates:"))
       (do
         (->files project ;; data
                  ;; [to file  		from template]
