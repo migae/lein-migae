@@ -8,14 +8,14 @@ with the magic template, like so:
 
 Once you have created the app, you can use standard leiningen 'compile',
 'jar', 'uberjar' to deal with your clojure code.  They use the
-standard :target-path to decide where to put the jar.  This plugin also supports subtasks clean, config, delein, and deploy."
+standard :target-path to decide where to put the jar.  This plugin also supports subtasks clean, config, libdir, and deploy."
   (:import java.io.File
            ;; com.google.appengine.tools.admin.AppCfg
            ;; [org.apache.commons.exec CommandLine DefaultExecutor]
            )
   (:require [leiningen.migae.config :as config]
             [leiningen.migae.deploy :as deploy]
-            [leiningen.migae.delein :as delein]
+            [leiningen.migae.libdir :as libdir]
             ;; [leiningen.migae.gserver :as gserver]
             ;; [leiningen.migae.jetty :as jetty]
             ;; [leiningen.migae.repl :as repl]
@@ -62,7 +62,7 @@ standard :target-path to decide where to put the jar.  This plugin also supports
                     ;; #'gserver/gserver
                     ;; #'jetty/jetty
                     ;; #'repl/repl
-                    #'delein/delein
+                    #'libdir/libdir
                     #'deploy/deploy]}
   migae
   "manage migae app"

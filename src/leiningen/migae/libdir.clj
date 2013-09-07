@@ -1,6 +1,7 @@
-(ns leiningen.migae.delein
-  "delein - a migae subtask for jarring up an appengine-migae app and copying dependencies to war/WEB-INF/lib.  (Not to be confused with the leiningen uberjar command.)    Kinda the opposite of what leiningen does.  The GAE dev environment only works if the needed jars are in war/WEB-INF/lib, so this task copies dependencies from the local ./m2 repo to the webapp lib dir."
+(ns leiningen.migae.libdir
+  "libdir - a migae subtask copying sdk jars to war/WEB-INF/lib."
   (:import java.io.File)
+  (:use [leiningen.libdir :exclude [libdir]])
   (:require [clojure.java.io :as io]
             [stencil.core :as stencil]
             [leiningen.classpath :as cp]
@@ -9,22 +10,28 @@
             [clojure.string :as string]))
 
 (defn flat-copy-tree [from to]
-;;  (println "\nFiles in " from " to " to)
   (doseq [f (.listFiles (io/as-file from))]
     (let [fn  (.getName (io/as-file f))]
       (if (.isDirectory f)
         (flat-copy-tree (.getPath f) to)
         (do
-          (print (format "deleining %s\n" f))
+          (println (format "\t%s" f))
           (io/make-parents to fn)
           (io/copy f (io/file to fn)))))))
 
-(defn delein [project & args]
-;;  (println "migae deleining...")
-  ;; (println "home: " (System/getProperty "user.home"))
-  (let [lib (str (:war (:gae-app project)) "/WEB-INF/lib/")
-        home (System/getProperty "user.home")]
-    (flat-copy-tree (str (:gae-sdk project) "/lib/user") lib)))
+(defn libdir [project & args]
+  (let [lib (str (:war (:migae project)) "/WEB-INF/lib/")]
+    (do
+      (println (format
+                "copying gae sdk jars to %s/WEB-INF/lib:"
+                (:war (:migae project ))))
+      (flat-copy-tree (str (:sdk (:migae project)) "/lib/user") lib)
+      (println (format
+                "copying project dependencies to %s/WEB-INF/lib using libdir plugin:"
+                (:war (:migae project ))))
+      (leiningen.libdir/libdir project args)
+    )))
+
     ;; TODO: iterate over (:dependencies project) and copy jars to lib
 ;;     (doseq [dep (:dependencies project)]
 ;;       (let [[name nbr] dep]
