@@ -62,7 +62,12 @@ Don't forget to set the version number in project.clj first!
 Download from https://github.com/greynolds/lein-migae, cd to the dir, and
 run "lein install"
 
-  :plugins [[migae "0.2.0-SNAPSHOT"]
+```
+:profiles {:dev {:plugins [[lein-migae "0.1.6-SNAPSHOT"]
+                             [lein-libdir "0.1.1"]]}}
+```
+
+
 
 or whatever the latest version number is.
 
