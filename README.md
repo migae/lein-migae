@@ -19,7 +19,7 @@ It is designed to work with the results of
 
 This plugin tries to run the whole show from project.clj.
 
-Step 1.  Create a new migae project by using the magic template:
+Step 1.  Create a new migae project by using the migae template:
 
     $ lein new migae app myapp:app-id /path/to/gae/sdk
 
@@ -35,9 +35,21 @@ and web.xml, and install other source files to the war tree.
     $ lein migae libdir  ## copy required jars to war/WEB-INF/lib
     $ lein migae config  ## generates web.xml, appengine-web.xml, etc. from mustache files in etc, data in project.clj
 
+It is a requirement of GAE that all required libraries be in
+war/WEB-INF/lib; this is due to the security restrictions of the GAE
+development server.  This includes certain jars from the GAE SDK as
+well as any clojure jars needed.  The migae libdir command takes care
+of this.
+
 Step 3.  Develop
 
 See the documentation at [migae](https://github.com/greynolds/migae)
+
+_CAVEAT_: `lein clean` will delete war/WEB-INF and everything in it.
+That should be fine, since everything there is generated.  After you
+do it, don't forget to run `lein migae libdir` and `lein migae config`
+again, in that order.  If it's a problem, edit the :clean-targets
+clause in project.clj.
 
 Step 4.  Deploy to the cloud:
 
