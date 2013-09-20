@@ -149,11 +149,17 @@ run 'lein migae config'."
                  ["{{#migae}}{{war}}{{/migae}}/WEB-INF/web.xml"
                   (render "web.xml.mustache" project)]
 
-                 ["{{#migae}}{{war}}{{/migae}}/WEB-INF/{{#migae}}{{java-logging}}{{/migae}}"
-                  (render
-                   (render-text "{{#migae}}{{java-logging}}{{/migae}}" project)
-                   project)]
-
                  )
+
+        (if (some #{:jul} (:logging (:migae project)))
+          (->files project
+                   ["{{#migae}}{{war}}{{/migae}}/WEB-INF/logging.properties"
+                    (render "logging.properties" project)]))
+
+        (if (some #{:slf4j} (:logging (:migae project)))
+          (->files project
+                   ["{{#migae}}{{war}}{{/migae}}/WEB-INF/classes/log4j.properties"
+                    (render "log4j.properties" project)]))
+
         (println "ok"))
       )))

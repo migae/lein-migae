@@ -1,4 +1,4 @@
-(defproject lein-migae "0.1.6-SNAPSHOT"
+(defproject lein-migae "0.1.7"
   :description "Leiningen plugin for migae sdk"
   :url "http://github.com/greynolds/lein-migae"
   :license {:name "Eclipse Public License"
