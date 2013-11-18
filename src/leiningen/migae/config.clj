@@ -1,7 +1,8 @@
 (ns leiningen.migae.config
   "config - a migae subtask for configuring a gae app"
 ;;  (:import [java.io File])
-  (:use [leiningen.new.templates :only [render-text slurp-resource sanitize year]])
+  (:use [leiningen.new.templates :only [render-text slurp-resource sanitize year]]
+        [leiningen.core.main :only [abort]])
   (:require [clojure.java.io :as io]
 ;            [clojure.contrib.io :as cio]
             [stencil.core :as stencil]
@@ -113,53 +114,63 @@ in <project>/.project using the data fields from project.clj.  So you
 should not edit the files directly; if you need to make a
 change (e.g. change the version number), edit the project.clj and then
 run 'lein migae config'."
-  [projmap & args]
-  (do
-    ;; (println (str "classpath: " (classpath)))
-    ;; (println (str "compiling " (:name project)))
-    ;; (jar/jar project)
-    (let [render (renderer "etc")
-          project (assoc projmap
-                 :projdir (System/getProperty "leiningen.original.pwd"))]
-      ;; (println (format "copying static files from src tree to war tree"))
-      ;; TODO:  use {{statics}} instead of hardcoded paths, e.g.
-                 ;; ["{{war}}/{{static_dest}}/css/{{project}}.css"
-                 ;;  (render (render-text "{{static_src}}/css/{{project}}.css" data))]
-                 ;; ["{{war}}/{{static_dest}}/js/{{project}}.js"
-                 ;;  (render (render-text "{{static_src}}/js/{{project}}.js" data))]
+  [projmap & [phase]]
+  (let [phase (if phase phase "dev")]
+    (do
+      (if (not= "dev" phase)
+        (if (not= "beta" phase)
+          (if (not= "prod" phase)
+            (abort (str "syntax: lein migae config [dev | beta | prod]")))))
+      (print (str "migae config " phase "..."))
+      ;; (println (str "compiling " (:name project)))
+      ;; (jar/jar project)
+      (let [render (renderer "etc")
+            project (assoc projmap
+                      :phase (first ((keyword phase)
+                                     (:version (:migae projmap))))
+                      :versionid (nth ((keyword phase)
+                                       (:version (:migae projmap))) 1)
+                      :projdir (System/getProperty "leiningen.original.pwd"))]
+            ;; foo (println (:phase project))]
+        (println (format "copying static files from src tree to war tree"))
+        ;; TODO:  use {{statics}} instead of hardcoded paths, e.g.
+        ;; ["{{war}}/{{static_dest}}/css/{{project}}.css"
+        ;;  (render (render-text "{{static_src}}/css/{{project}}.css" data))]
+        ;; ["{{war}}/{{static_dest}}/js/{{project}}.js"
+        ;;  (render (render-text "{{static_src}}/js/{{project}}.js" data))]
 
-      (copy-tree "src/main/public" "war")
+        (copy-tree "resources/public" "war")
 
-                 ;; TODO: handle binary files??
-                 ;; ["{{war}}/favicon.ico"
-                 ;;  (render (render-text "{{resource_src}}/favicon.ico" data))]
-      ;;      (println (format "copying resource files from src tree to war tree"))
+        ;; TODO: handle binary files??
+        ;; ["{{war}}/favicon.ico"
+        ;;  (render (render-text "{{resource_src}}/favicon.ico" data))]
+        ;;      (println (format "copying resource files from src tree to war tree"))
 
-      ;; (println (format "installing config files from templates:"))
-      (do
-        (->files project ;; data
-                 ;; [to file  		from template]
+        ;; (println (format "installing config files from templates:"))
+        (do
+          (main/apply-task ["migae" "libdir"] project nil)
 
-                 ["src/.dir-locals.el"
-                  (render "dir-locals.el.mustache" project)]
+          (->files project ;; data
+                   ;; [to file  		from template]
 
-                 ["{{#migae}}{{war}}{{/migae}}/WEB-INF/appengine-web.xml"
-                  (render "appengine-web.xml.mustache" project)]
+                   ["src/clj/.dir-locals.el"
+                    (render "dir-locals.el.mustache" project)]
 
-                 ["{{#migae}}{{war}}{{/migae}}/WEB-INF/web.xml"
-                  (render "web.xml.mustache" project)]
+                   ["{{#migae}}{{war}}{{/migae}}/WEB-INF/appengine-web.xml"
+                    (render "appengine-web.xml.mustache" project)]
 
-                 )
+                   ["{{#migae}}{{war}}{{/migae}}/WEB-INF/web.xml"
+                    (render "web.xml.mustache" project)])
 
-        (if (some #{:jul} (:logging (:migae project)))
-          (->files project
-                   ["{{#migae}}{{war}}{{/migae}}/WEB-INF/logging.properties"
-                    (render "logging.properties" project)]))
+          (if (some #{:jul} (:logging (:migae project)))
+            (->files project
+                     ["{{#migae}}{{war}}{{/migae}}/WEB-INF/logging.properties"
+                      (render "logging.properties" project)]))
 
-        (if (some #{:slf4j} (:logging (:migae project)))
-          (->files project
-                   ["{{#migae}}{{war}}{{/migae}}/WEB-INF/classes/log4j.properties"
-                    (render "log4j.properties" project)]))
+          (if (some #{:slf4j} (:logging (:migae project)))
+            (->files project
+                     ["{{#migae}}{{war}}{{/migae}}/WEB-INF/classes/log4j.properties"
+                      (render "log4j.properties" project)]))
 
-        (println "ok"))
-      )))
+          (println "ok"))
+        ))))

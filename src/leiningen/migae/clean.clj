@@ -11,3 +11,6 @@ dirs."
 
 (defn clean [& args]
   (println "migae cleaning...someday"))
+
+
+;; TODO:  delete all of war?

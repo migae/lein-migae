@@ -9,6 +9,16 @@
             [leiningen.core [eval :as eval] [main :as main]]
             [clojure.string :as string]))
 
+(defn flat-copy [from to]
+  (doseq [f (.listFiles (io/as-file from))]
+    (let [fn  (.getName (io/as-file f))]
+      (if (.isDirectory f)
+        nil
+        (do
+          (println (format "\t%s" f))
+          (io/make-parents to fn)
+          (io/copy f (io/file to fn)))))))
+
 (defn flat-copy-tree [from to]
   (doseq [f (.listFiles (io/as-file from))]
     (let [fn  (.getName (io/as-file f))]
@@ -25,7 +35,8 @@
       (println (format
                 "copying gae sdk jars to %s/WEB-INF/lib:"
                 (:war (:migae project ))))
-      (flat-copy-tree (str (:sdk (:migae project)) "/lib/user") lib)
+      ;; (flat-copy-tree (str (:sdk (:migae project)) "/lib/user") lib)
+      (flat-copy (str (:sdk (:migae project)) "/lib/user") lib)
       (println (format
                 "copying project dependencies to %s/WEB-INF/lib using libdir plugin:"
                 (:war (:migae project ))))
