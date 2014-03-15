@@ -13,21 +13,31 @@
 
 ;; TODO:  add subcommands:  start|stop|restart
 
-(defn jetty [project]
+(defn jetty [project & args]
   (let [home (utils/get-system-property "user.home")
-        clj "/.m2/repository/org/clojure/clojure/1.5.1/clojure-1.5.1.jar"
-        jetty-runner  "/.m2/repository/org/eclipse/jetty/jetty-runner/9.0.5.v20130815/jetty-runner-9.0.5.v20130815.jar"
-        jetty-deploy "/.m2/repository/org/eclipse/jetty/jetty-deploy/8.0.0.RC0/jetty-deploy-8.0.0.RC0.jar"]
+        jardir (System/getenv "JARDIR")
+        clj (str jardir "/clojure.jar")
+        jetty-runner (str jardir  "/jetty-runner.jar")
+        cmd (str/join " " ["java -jar"
+                           jetty-runner
+                           "--out" "jetty.err.log"
+                           "--log" "jetty.rqst.log"
+                           "--classes" "src/"
+                           "--jar" clj
+                           ;; "--config jetty.xml"
+                           "--stop-port" "8123"
+                           "--stop-key" "migae"
+                           "war"
+                           "1>jetty.err.log 2>&1 &"])]
     (do (println "launching jetty-runner")
         ;;      (eval/eval-in-project project
-        (println (sh/sh "sh" "-c"
-                        (str/join " " ["java -jar"
-                                       (str home jetty-runner)
-                                       "--out" "jetty.err.log"
-                                       "--log" "jetty.rqst.log"
-                                       "--classes" "src/"
-                                       "--jar" (str home clj)
-                                       "--jar" (str home jetty-deploy)
-                                       ;; "--config jetty.xml"
-                                       "war"
-                                       "1>jetty.err.log 2>&1 &"]))))))
+        (println (sh/sh "sh" "-cv" cmd)))))
+
+    ;;         war \
+    ;;         1>jetty.err.log 2>&1 &
+    ;;     ;;
+    ;; stop)
+    ;;     (echo "migae"; echo "stop"; sleep 1;)| telnet localhost 8123
+    ;;     ;;
+    ;; help)
+

@@ -13,14 +13,15 @@ standard :target-path to decide where to put the jar.  This plugin also supports
            ;; com.google.appengine.tools.admin.AppCfg
            ;; [org.apache.commons.exec CommandLine DefaultExecutor]
            )
-  (:require [leiningen.migae.config :as config]
+  (:require [leiningen.migae.clean :as clean]
+            [leiningen.migae.config :as config]
             [leiningen.migae.deploy :as deploy]
-            [leiningen.migae.libdir :as libdir]
-            [leiningen.migae.run :as run]
             ;; [leiningen.migae.gserver :as gserver]
-            ;; [leiningen.migae.jetty :as jetty]
+            [leiningen.migae.jetty :as jetty]
+            [leiningen.migae.libdir :as libdir]
             ;; [leiningen.migae.repl :as repl]
-            [leiningen.migae.util :as util]
+            [leiningen.migae.run :as run]
+            [leiningen.migae.version :as version]
             [clojure.tools.cli :as cli]
             [clojure.tools.logging :as log :only [debug info]]))
 
@@ -59,21 +60,24 @@ standard :target-path to decide where to put the jar.  This plugin also supports
            not-found))))
   ([task] (resolve-task task #'task-not-found)))
 
-(defn #^{:subtasks [#'config/config
-                    #'run/run
-                    ;; #'gserver/gserver
-                    ;; #'jetty/jetty
-                    ;; #'repl/repl
+(defn #^{:subtasks [#'clean/clean
+                    #'config/config
+                    #'deploy/deploy
                     #'libdir/libdir
-                    #'deploy/deploy]}
+                    ;; #'gserver/gserver
+                    #'jetty/jetty
+                    ;; #'repl/repl
+                    #'run/run
+                    #'version/version
+                    ]}
   migae
   "manage migae app"
   [project cmd & args]
   (let [subtask (resolve-task (or cmd "help"))
         command cmd]
     (try
-      (binding [util/*app* nil] ;;(:app opts)]
-        (apply subtask project args))
+      ;; (binding [util/*app* nil] ;;(:app opts)]
+        (apply subtask project args)
       (catch Exception e
         (abort (or (.getMessage e) (pr e)))))))
 
