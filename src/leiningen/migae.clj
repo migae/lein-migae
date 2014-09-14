@@ -19,6 +19,7 @@ standard :target-path to decide where to put the jar.  This plugin also supports
             ;; [leiningen.migae.gserver :as gserver]
             [leiningen.migae.jetty :as jetty]
             [leiningen.migae.libdir :as libdir]
+            [leiningen.migae.mvn :as mvn]
             ;; [leiningen.migae.repl :as repl]
             [leiningen.migae.run :as run]
             [leiningen.migae.version :as version]
@@ -64,6 +65,7 @@ standard :target-path to decide where to put the jar.  This plugin also supports
                     #'config/config
                     #'deploy/deploy
                     #'libdir/libdir
+                    #'mvn/mvn
                     ;; #'gserver/gserver
                     #'jetty/jetty
                     ;; #'repl/repl

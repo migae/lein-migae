@@ -1,5 +1,5 @@
-(ns leiningen.migae.config
-  "config - a migae subtask for configuring a gae app"
+(ns leiningen.migae.mvn
+  "mvn - a migae subtask for configuring a gae maven app"
 ;;  (:import [java.io File])
   (:use [leiningen.new.templates :only [render-text slurp-resource sanitize year]]
         [leiningen.core.main :only [abort]])
@@ -101,8 +101,8 @@
 ;;                                         ;    (println "Could not create directory " dir ". Maybe it already exists?"))))
 ;; ;; end of overrides
 
-(defn config
-  "copy/transform files into the war dir structure - 'lein migae :config'
+(defn mvn
+  "copy/transform files into the war dir structure - 'lein migae mvn'
 
 This task is designed to support the need to distribute all the other
 files you need for a (java) webapp: what goes in the war dir, WEB-INF,
@@ -113,15 +113,15 @@ The files are created by processing the (stencil/mustache) templates
 in <project>/.project using the data fields from project.clj.  So you
 should not edit the files directly; if you need to make a
 change (e.g. change the version number), edit the project.clj and then
-run 'lein migae config'."
+run 'lein migae mvn'."
   [projmap & [phase]]
   (let [phase (if phase phase "dev")]
     (do
       (if (not= "dev" phase)
         (if (not= "beta" phase)
           (if (not= "prod" phase)
-            (abort (str "syntax: lein migae config [dev | beta | prod]")))))
-      (print (str "migae config " phase "..."))
+            (abort (str "syntax: lein migae mvn [dev | beta | prod]")))))
+      (print (str "migae mvn " phase "..."))
       ;; (println (str "compiling " (:name project)))
       ;; (jar/jar project)
       (let [render (renderer "etc")
@@ -132,14 +132,14 @@ run 'lein migae config'."
                                        (:version (:migae projmap))) 1)
                       :projdir (System/getProperty "leiningen.original.pwd"))]
             ;; foo (println (:phase project))]
-        (println (format "copying static files from src tree to war tree"))
+        ;; (println (format "copying static files from src tree to war tree"))
         ;; TODO:  use {{statics}} instead of hardcoded paths, e.g.
         ;; ["{{war}}/{{static_dest}}/css/{{project}}.css"
         ;;  (render (render-text "{{static_src}}/css/{{project}}.css" data))]
         ;; ["{{war}}/{{static_dest}}/js/{{project}}.js"
         ;;  (render (render-text "{{static_src}}/js/{{project}}.js" data))]
 
-        (copy-tree "resources/public" "war")
+        ;; (copy-tree "resources/public" "war")
 
         ;; TODO: handle binary files??
         ;; ["{{war}}/favicon.ico"
@@ -148,31 +148,35 @@ run 'lein migae config'."
 
         ;; (println (format "installing config files from templates:"))
         (do
-          (main/apply-task ["migae" "libdir"] project nil)
-
+          ;; (main/apply-task ["migae" "libdir"] project nil)
+ 
           (->files project ;; data
                    ;; [to file  		from template]
 
                    ["src/clj/.dir-locals.el"
-                    (render "dir-locals-src-el.mustache" project)]
+                    (render "dir-locals.el.mustache" project)]
 
-                   ["resources/.dir-locals.el"
-                    (render "dir-locals-resources-el.mustache" project)]
+                   ;; ["resources/.dir-locals.el"
+                   ;;  (render "dir-locals-resources-el.mustache" project)]
 
-                   ["{{#migae}}{{war}}{{/migae}}/WEB-INF/appengine-web.xml"
+                   ;; ["{{#migae}}{{war}}{{/migae}}/WEB-INF/appengine-web.xml"
+                   ["{{name}}-war/src/main/webapp/WEB-INF/appengine-web.xml"
                     (render "appengine-web.xml.mustache" project)]
 
-                   ["{{#migae}}{{war}}{{/migae}}/WEB-INF/web.xml"
+                   ;; ["{{#migae}}{{war}}{{/migae}}/WEB-INF/web.xml"
+                   ["{{name}}-war/src/main/webapp/WEB-INF/web.xml"
                     (render "web.xml.mustache" project)])
 
           (if (some #{:jul} (:logging (:migae project)))
             (->files project
-                     ["{{#migae}}{{war}}{{/migae}}/WEB-INF/logging.properties"
+                     ;; ["{{#migae}}{{war}}{{/migae}}/WEB-INF/logging.properties"
+                     ["{{name}}-war/src/main/webapp/WEB-INF/logging.properties"
                       (render "logging.properties" project)]))
 
           (if (some #{:slf4j} (:logging (:migae project)))
             (->files project
-                     ["{{#migae}}{{war}}{{/migae}}/WEB-INF/classes/log4j.properties"
+                     ;; ["{{#migae}}{{war}}{{/migae}}/WEB-INF/classes/log4j.properties"
+                     ["{{name}}-war/src/main/webapp/WEB-INF/log4j.properties"
                       (render "log4j.properties" project)]))
 
           (println "ok"))
