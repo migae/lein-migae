@@ -1,4 +1,4 @@
-(defproject lein-migae "0.1.8-SNAPSHOT"
+(defproject lein-migae "0.3.0-SNAPSHOT"
   :description "Leiningen plugin for migae sdk"
   :url "http://github.com/greynolds/lein-migae"
   :license {:name "Eclipse Public License"
@@ -15,4 +15,6 @@
                  [ring "1.1.8"]
                  [ring-refresh "0.1.2"]
                  [com.google.appengine/appengine-tools-sdk "1.8.3"]]
+  :repositories [["clojars" {:url "https://clojars.org/repo"
+                             :sign-releases false}]]
   :eval-in-leiningen true)

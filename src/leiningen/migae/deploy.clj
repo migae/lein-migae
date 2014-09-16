@@ -90,6 +90,8 @@
   [project phase & args]
   (println phase)
   ;; (main/apply-task "bluuugh" project args)
+  (main/apply-task "deps" project args)
+  (main/apply-task ["cljsbuild" "clean"] project args)
   (main/apply-task "clean" project args)
   (main/apply-task ["migae" "clean"] project args)
   (main/apply-task ["migae" "config" phase] project args)
