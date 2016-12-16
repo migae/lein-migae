@@ -1,5 +1,8 @@
 # migae
 
+*DEPRECATED* - use [boot-migae](https://github.com/migae/boot-gae) instead.
+
+
 migae is a leiningen plugin for managing migae (Google App Engine) applications.
 
 It is designed to work with the results of
